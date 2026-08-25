@@ -17,6 +17,7 @@ export class CameraRig {
     this.lat = this.homeLat;
 
     this.gyroActive = false;
+    this.locked = false;
     this.userYaw = 0;
     this.userPitch = 0;
 
@@ -42,6 +43,7 @@ export class CameraRig {
   }
 
   rotate(dx, dy) {
+    if (this.locked) return;
     const k = 0.0032;
     if (this.gyroActive) {
       this.userYaw -= dx * k;
@@ -74,6 +76,20 @@ export class CameraRig {
     this.lon = this.homeLon;
     this.lat = this.homeLat;
     this.targetFov = this.baseFov;
+  }
+
+  currentLon() {
+    const f = new THREE.Vector3();
+    this.camera.getWorldDirection(f);
+    return Math.atan2(-f.x, -f.z);
+  }
+
+  faceLon(lon) {
+    if (this.gyroActive) {
+      this.userYaw += lon - this.currentLon();
+    } else {
+      this.lon = lon;
+    }
   }
 
   update(dt) {

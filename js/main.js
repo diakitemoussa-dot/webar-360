@@ -1,14 +1,17 @@
 import * as THREE from 'three';
-import { PanoramaSystem } from './PanoramaSystem.js';
 import { CameraRig } from './CameraRig.js';
 import { GyroControls } from './GyroControls.js';
 import { TouchControls } from './TouchControls.js';
 import { HotspotSystem } from './HotspotSystem.js';
 import { AudioManager } from './AudioManager.js';
 import { GuideSystem } from './GuideSystem.js';
+import { TourController } from './TourController.js';
 
 const app = document.getElementById('app');
 const motionPrompt = document.getElementById('motionPrompt');
+const hotspotLayer = document.getElementById('hotspotLayer');
+const navLayer = document.getElementById('navLayer');
+const nodeLabel = document.getElementById('nodeLabel');
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -20,37 +23,41 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  78,
-  innerWidth / innerHeight,
-  0.1,
-  1100
-);
+const camera = new THREE.PerspectiveCamera(78, innerWidth / innerHeight, 0.1, 1100);
 
 const rig = new CameraRig(camera);
 const gyro = new GyroControls(rig);
 new TouchControls(renderer.domElement, rig);
-
-const panorama = new PanoramaSystem(
-  scene,
-  renderer.capabilities.getMaxAnisotropy()
-);
-
-const hotspotSystem = new HotspotSystem(
-  document.getElementById('hotspotLayer'),
-  camera,
-  openHotspotPanel
-);
-
 const audio = new AudioManager();
 const guide = new GuideSystem(scene);
 
-panorama
-  .load('assets/panorama-preview.jpg')
-  .then(() => panorama.load('assets/panorama.jpg'))
-  .catch(() => panorama.load('assets/panorama.jpg'));
+const hotspotSystem = new HotspotSystem(hotspotLayer, camera, openHotspotPanel);
 
-guide.autodetect();
+const tour = new TourController({
+  scene,
+  camera,
+  rig,
+  audio,
+  hotspotSystem,
+  navLayer,
+  hotspotLayer,
+  mapDots: document.getElementById('mapDots'),
+  onTravelStart: () => {
+    panel.classList.remove('open');
+    aboutPanel.classList.remove('open');
+    stopNarration();
+  }
+});
+
+tour.enterStart().then(() => {
+  nodeLabel.textContent = tour.current.name;
+});
+
+const _updateMapLabel = tour._updateMap.bind(tour);
+tour._updateMap = function () {
+  _updateMapLabel();
+  nodeLabel.textContent = this.current.name;
+};
 
 const panel = document.getElementById('hotspotPanel');
 const panelTitle = document.getElementById('panelTitle');
@@ -58,7 +65,6 @@ const panelText = document.getElementById('panelText');
 const panelImage = document.getElementById('panelImage');
 const narrationBtn = document.getElementById('narrationBtn');
 let narration = null;
-let currentNarrationUrl = null;
 
 document.getElementById('panelClose').addEventListener('click', () => {
   panel.classList.remove('open');
@@ -99,7 +105,6 @@ async function openHotspotPanel(data) {
     const head = await fetch(url, { method: 'HEAD' });
     if (head.ok) {
       stopNarration();
-      currentNarrationUrl = url;
       narration = new Audio(url);
       narration.addEventListener('ended', () => {
         narrationBtn.classList.remove('playing');
@@ -131,6 +136,14 @@ soundBtn.addEventListener('click', async () => {
 document.getElementById('backBtn').addEventListener('click', () => {
   if (history.length > 1) history.back();
 });
+
+const mapToggle = document.getElementById('mapToggle');
+const mapPanel = document.getElementById('mapPanel');
+mapToggle.addEventListener('click', () => {
+  mapPanel.hidden = !mapPanel.hidden;
+});
+
+guide.autodetect();
 
 let motionRequested = false;
 motionPrompt.addEventListener('click', tryEnableMotion);
@@ -170,6 +183,7 @@ renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
   rig.update(dt);
   guide.update(dt);
+  tour.update();
   hotspotSystem.update();
   renderer.render(scene, camera);
 });

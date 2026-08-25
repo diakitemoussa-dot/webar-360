@@ -19,6 +19,18 @@
 <body>
   <div id="app"></div>
   <div id="hotspotLayer"></div>
+  <div id="navLayer"></div>
+
+  <div id="minimap">
+    <div id="mapPanel" hidden>
+      <div class="map-title">VILLAGE MAP</div>
+      <div id="mapDots"></div>
+      <div class="map-legend"><span class="dot current-dot"></span> You are here</div>
+    </div>
+    <button class="icon-btn" id="mapToggle" aria-label="Map">
+      <svg viewBox="0 0 24 24"><path d="M9 4L3.8 6v14L9 18l6 2 5.2-2V4L15 6 9 4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+  </div>
 
   <header id="topbar">
     <button class="icon-btn" id="backBtn" aria-label="Back">
@@ -26,7 +38,7 @@
     </button>
     <div class="brand">
       <span class="brand-title">DOGON VILLAGE</span>
-      <span class="brand-sub">Bandiagara · Immersive visit</span>
+      <span class="brand-sub" id="nodeLabel">Bandiagara · Immersive visit</span>
     </div>
     <button class="icon-btn" id="infoBtn" aria-label="Information">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 10.5v6M12 7.4v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

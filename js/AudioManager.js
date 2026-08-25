@@ -2,48 +2,88 @@ export class AudioManager {
   constructor() {
     this.ctx = null;
     this.enabled = false;
-    this.usingFile = false;
-    this.audioEl = null;
-    this._nodes = null;
-    this.fileUrl = 'assets/audio/ambient.mp3';
-  }
-
-  async hasAudioFile() {
-    try {
-      const res = await fetch(this.fileUrl, { method: 'HEAD' });
-      return res.ok;
-    } catch {
-      return false;
-    }
+    this.synthNodes = null;
+    this.nodeAudio = null;
+    this.currentNodeId = null;
   }
 
   async toggle() {
     if (this.enabled) {
-      this._stop();
+      this._pauseAll();
       this.enabled = false;
       return false;
     }
     if (!this.ctx) {
-      this.usingFile = await this.hasAudioFile();
-      if (this.usingFile) this._initFile();
-      else this._initSynth();
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new Ctx();
     }
     await this.ctx.resume();
-    this._start();
     this.enabled = true;
+    if (this.nodeAudio) {
+      this.nodeAudio.play().catch(() => {});
+      this._fadeEl(this.nodeAudio, 0, 0.8, 1000);
+    } else {
+      this._startSynth();
+    }
     return true;
   }
 
-  _initFile() {
-    this.audioEl = new Audio(this.fileUrl);
-    this.audioEl.loop = true;
-    this.audioEl.crossOrigin = 'anonymous';
+  async setNode(id) {
+    this.currentNodeId = id;
+    if (!this.enabled) return;
+
+    let el = null;
+    const url = `assets/audio/${id}.mp3`;
+    try {
+      const head = await fetch(url, { method: 'HEAD' });
+      if (head.ok) {
+        el = new Audio(url);
+        el.loop = true;
+        el.volume = 0;
+      }
+    } catch {}
+
+    if (this.nodeAudio && this.nodeAudio !== el) {
+      const old = this.nodeAudio;
+      this.nodeAudio = null;
+      this._fadeEl(old, old.volume, 0, 700).then(() => old.pause());
+    }
+
+    if (el) {
+      this.nodeAudio = el;
+      el.play().catch(() => {});
+      this._fadeEl(el, 0, 0.8, 1500);
+      this._stopSynth(700);
+    } else if (!this.synthNodes) {
+      this._startSynth();
+    }
   }
 
-  _initSynth() {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new Ctx();
+  _pauseAll() {
+    if (this.nodeAudio) this.nodeAudio.pause();
+    if (this.synthNodes) {
+      this.synthNodes.master.gain.linearRampToValueAtTime(
+        0,
+        this.ctx.currentTime + 0.4
+      );
+    }
+  }
 
+  _fadeEl(el, from, to, dur) {
+    return new Promise((resolve) => {
+      const t0 = performance.now();
+      const step = () => {
+        const t = Math.min(1, (performance.now() - t0) / dur);
+        el.volume = Math.max(0, Math.min(1, from + (to - from) * t));
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      step();
+    });
+  }
+
+  _startSynth() {
+    if (!this.ctx || this.synthNodes) return;
     const length = this.ctx.sampleRate * 4;
     const buffer = this.ctx.createBuffer(1, length, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -86,39 +126,23 @@ export class AudioManager {
     noise.connect(air).connect(airGain).connect(master);
     master.connect(this.ctx.destination);
 
-    this._nodes = { noise, lfo, master };
+    noise.start();
+    lfo.start();
+    master.gain.linearRampToValueAtTime(0.9, this.ctx.currentTime + 1.5);
+
+    this.synthNodes = { noise, lfo, master };
   }
 
-  _start() {
-    if (this.usingFile) {
-      this.audioEl.play().catch(() => {});
-    } else {
-      this._nodes.noise.start();
-      this._nodes.lfo.start();
-      this._nodes.master.gain.linearRampToValueAtTime(
-        0.9,
-        this.ctx.currentTime + 1.5
-      );
-    }
-  }
-
-  _stop() {
-    if (this.usingFile) {
-      this.audioEl.pause();
-    } else if (this.ctx) {
-      this._nodes.master.gain.linearRampToValueAtTime(
-        0,
-        this.ctx.currentTime + 0.6
-      );
-      setTimeout(() => {
-        try {
-          this._nodes.noise.stop();
-          this._nodes.lfo.stop();
-        } catch {}
-      }, 800);
-      this.ctx.close();
-      this.ctx = null;
-      this._nodes = null;
-    }
+  _stopSynth(fadeMs = 600) {
+    if (!this.synthNodes) return;
+    const { noise, lfo, master } = this.synthNodes;
+    this.synthNodes = null;
+    master.gain.linearRampToValueAtTime(0, this.ctx.currentTime + fadeMs / 1000);
+    setTimeout(() => {
+      try {
+        noise.stop();
+        lfo.stop();
+      } catch {}
+    }, fadeMs + 300);
   }
 }
