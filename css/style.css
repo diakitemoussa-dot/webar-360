@@ -149,6 +149,30 @@ section.panel p {
   font-size: 13.5px; line-height: 1.75; color: var(--dim);
 }
 
+#hotspotPanel { padding: 0 0 20px; overflow: hidden; }
+#hotspotPanel .panel-body { padding: 16px 24px 0; }
+#panelImage {
+  width: 100%; height: 150px;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid var(--line);
+}
+#panelImage:not([src]) { display: none; }
+
+#narrationBtn {
+  margin-top: 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(232,180,90,.5);
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px; letter-spacing: 1.5px; font-weight: 600;
+  cursor: pointer;
+}
+#narrationBtn svg { width: 14px; height: 14px; }
+#narrationBtn.playing { border-color: var(--line); color: var(--dim); }
+
 .close-x {
   position: absolute; top: 10px; right: 12px;
   width: 32px; height: 32px;

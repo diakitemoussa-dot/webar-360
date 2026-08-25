@@ -55,15 +55,59 @@ guide.autodetect();
 const panel = document.getElementById('hotspotPanel');
 const panelTitle = document.getElementById('panelTitle');
 const panelText = document.getElementById('panelText');
+const panelImage = document.getElementById('panelImage');
+const narrationBtn = document.getElementById('narrationBtn');
+let narration = null;
+let currentNarrationUrl = null;
+
 document.getElementById('panelClose').addEventListener('click', () => {
   panel.classList.remove('open');
+  stopNarration();
 });
 
-function openHotspotPanel(data) {
+function stopNarration() {
+  if (narration) {
+    narration.pause();
+    narration = null;
+  }
+  narrationBtn.hidden = true;
+  narrationBtn.classList.remove('playing');
+}
+
+narrationBtn.addEventListener('click', () => {
+  if (!narration) return;
+  if (narration.paused) {
+    narration.play();
+    narrationBtn.classList.add('playing');
+    narrationBtn.querySelector('span').textContent = 'Pause';
+  } else {
+    narration.pause();
+    narrationBtn.classList.remove('playing');
+    narrationBtn.querySelector('span').textContent = 'Listen';
+  }
+});
+
+async function openHotspotPanel(data) {
   panelTitle.textContent = data.title;
   panelText.textContent = data.text;
+  panelImage.src = data.image;
   panel.classList.add('open');
-  if (audio.ctx) audio.ctx.resume();
+  stopNarration();
+
+  const url = `assets/audio/${data.id}.mp3`;
+  try {
+    const head = await fetch(url, { method: 'HEAD' });
+    if (head.ok) {
+      stopNarration();
+      currentNarrationUrl = url;
+      narration = new Audio(url);
+      narration.addEventListener('ended', () => {
+        narrationBtn.classList.remove('playing');
+        narrationBtn.querySelector('span').textContent = 'Listen';
+      });
+      narrationBtn.hidden = false;
+    }
+  } catch {}
 }
 
 const aboutPanel = document.getElementById('aboutPanel');

@@ -46,8 +46,15 @@
 
   <section id="hotspotPanel" aria-hidden="true">
     <button class="close-x" id="panelClose" aria-label="Close">&times;</button>
-    <h2 id="panelTitle"></h2>
-    <p id="panelText"></p>
+    <img id="panelImage" alt="" />
+    <div class="panel-body">
+      <h2 id="panelTitle"></h2>
+      <p id="panelText"></p>
+      <button id="narrationBtn" hidden>
+        <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/></svg>
+        <span>Listen</span>
+      </button>
+    </div>
   </section>
 
   <section id="aboutPanel" aria-hidden="true">

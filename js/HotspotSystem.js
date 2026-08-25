@@ -4,35 +4,40 @@ export const HOTSPOTS = [
   {
     id: 'cliff',
     title: 'THE CLIFF',
-    text: 'The Bandiagara escarpment rises up to 500 metres. For centuries its rock shelters and caves have served as burial sites and granaries, and the cliff remains the spiritual guardian of the Dogon country.',
+    text: 'The Bandiagara escarpment rises up to 500 metres above the plain. For centuries its rock shelters and caves have served as burial sites and sanctuaries. The Tellem built their dwellings in its walls long before the Dogon arrived, and the cliff remains the spiritual guardian of the whole region.',
+    image: 'assets/hotspots/cliff.jpg',
     yaw: 10,
     pitch: 6
   },
   {
     id: 'houses',
     title: 'THE HOUSES',
-    text: 'Built from banco — earth, straw and shea butter — these rectangular houses stay cool by day and warm at night. Their low doors and small openings protect the family and its belongings.',
+    text: 'Built from banco — a mix of earth, straw and shea butter — these rectangular houses stay cool by day and warm at night. Walls must be replastered after every rainy season, a task that brings the whole family together. Low doors and small openings protect the family and its belongings.',
+    image: 'assets/hotspots/houses.jpg',
     yaw: 28,
     pitch: -6
   },
   {
     id: 'granaries',
     title: 'THE GRANARIES',
-    text: 'Each family owns several granaries: one for millet, one for onions, others for personal belongings. The conical thatched roofs and sealed doors protect the harvest from rain, rodents and intruders.',
+    text: 'Each family owns several granaries: one for millet, one for onions, others for personal belongings. The conical thatched roofs and sealed doors protect the harvest from rain, rodents and intruders. The shape has become a symbol of Dogon architecture.',
+    image: 'assets/hotspots/granaries.jpg',
     yaw: -115,
     pitch: -2
   },
   {
     id: 'roofs',
     title: 'THE THATCHED ROOFS',
-    text: 'Roofed with millet straw bundled in layers, the pointed roofs shed the heavy rains of the season. The same technique is used on the toguna, the shaded meeting place of the village elders.',
+    text: 'Roofed with millet straw bundled in thick layers, the pointed roofs shed the heavy rains of the season. The same technique covers the toguna — the shaded meeting place of the village elders, kept low on purpose so discussions stay calm.',
+    image: 'assets/hotspots/roofs.jpg',
     yaw: 110,
     pitch: -2
   },
   {
     id: 'life',
     title: 'VILLAGE LIFE',
-    text: 'Life unfolds on the sandy square: children playing, women pounding millet, weavers and smiths at work. Markets, masked dances and councils all take place in the heart of the village.',
+    text: 'Life unfolds on the sandy square: children playing, women pounding millet, weavers and smiths at work. Markets, masked dances and village councils all take place here, in the heart of daily Dogon life.',
+    image: 'assets/hotspots/life.jpg',
     yaw: -55,
     pitch: -13
   }
