@@ -33,9 +33,13 @@ export class AudioManager {
     if (!this.enabled) return;
 
     let el = null;
-    const url = `assets/audio/${id}.mp3`;
+    let url = `assets/audio/${id}.mp3`;
     try {
-      const head = await fetch(url, { method: 'HEAD' });
+      let head = await fetch(url, { method: 'HEAD' });
+      if (!head.ok) {
+        url = 'assets/audio/ambience.mp3';
+        head = await fetch(url, { method: 'HEAD' });
+      }
       if (head.ok) {
         el = new Audio(url);
         el.loop = true;
