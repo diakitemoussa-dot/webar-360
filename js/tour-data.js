@@ -9,8 +9,8 @@ export const TOUR = {
       position: [0, 0, 0],
       heading0: 0,
       links: [
-        { to: 'p2', yaw: -25, label: 'TO THE ALLEY' },
-        { to: 'p3', yaw: 75, label: 'EXPLORE THE CLIFF' }
+        { to: 'p2', yaw: 75, label: 'TO THE ALLEY' },
+        { to: 'p3', yaw: -25, label: 'EXPLORE THE CLIFF' }
       ]
     },
     {
