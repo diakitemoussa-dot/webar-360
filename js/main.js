@@ -42,6 +42,11 @@ const tour = new TourController({
   navLayer,
   hotspotLayer,
   mapDots: document.getElementById('mapDots'),
+  onNodeChange: (node) => {
+    nodeLabel.textContent = node.name;
+    backBtn.disabled = !tour.canGoBack();
+    backBtn.classList.toggle('disabled', !tour.canGoBack());
+  },
   onTravelStart: () => {
     panel.classList.remove('open');
     aboutPanel.classList.remove('open');
@@ -49,15 +54,7 @@ const tour = new TourController({
   }
 });
 
-tour.enterStart().then(() => {
-  nodeLabel.textContent = tour.current.name;
-});
-
-const _updateMapLabel = tour._updateMap.bind(tour);
-tour._updateMap = function () {
-  _updateMapLabel();
-  nodeLabel.textContent = this.current.name;
-};
+tour.enterStart();
 
 const panel = document.getElementById('hotspotPanel');
 const panelTitle = document.getElementById('panelTitle');
@@ -133,8 +130,9 @@ soundBtn.addEventListener('click', async () => {
   soundBtn.classList.toggle('off', !on);
 });
 
-document.getElementById('backBtn').addEventListener('click', () => {
-  if (history.length > 1) history.back();
+const backBtn = document.getElementById('backBtn');
+backBtn.addEventListener('click', () => {
+  tour.goBack();
 });
 
 const mapToggle = document.getElementById('mapToggle');

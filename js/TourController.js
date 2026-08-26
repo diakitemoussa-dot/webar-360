@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { TOUR } from './tour-data.js';
-import { DEG, dirFromHeading, headingBetween, lonForHeading, worldPosition } from './spatial.js';
+import { headingBetween, lonForHeading, worldPosition } from './spatial.js';
 
 const TRANSITION_MS = 2400;
 
@@ -17,7 +17,7 @@ function loadTexture(url) {
 }
 
 export class TourController {
-  constructor({ scene, camera, rig, audio, hotspotSystem, navLayer, hotspotLayer, mapDots, onTravelStart }) {
+  constructor({ scene, camera, rig, audio, hotspotSystem, navLayer, hotspotLayer, mapDots, onTravelStart, onNodeChange }) {
     this.scene = scene;
     this.camera = camera;
     this.rig = rig;
@@ -27,6 +27,7 @@ export class TourController {
     this.hotspotLayer = hotspotLayer;
     this.mapDots = mapDots;
     this.onTravelStart = onTravelStart;
+    this.onNodeChange = onNodeChange;
 
     this.nodeById = new Map(TOUR.nodes.map((n) => [n.id, n]));
     this.nodes = TOUR.nodes;
@@ -34,6 +35,7 @@ export class TourController {
     this.transitioning = false;
     this.textures = new Map();
     this.markers = [];
+    this.history = [];
     this._tween = null;
     this._proj = new THREE.Vector3();
 
@@ -64,6 +66,7 @@ export class TourController {
     this.hotspotSystem.setForNode(node);
     this._buildMarkers(node);
     this._updateMap();
+    this.onNodeChange?.(node);
     this.audio.setNode(node.id);
     const full = await loadTexture(node.image);
     if (this.current === node && !this.transitioning) {
@@ -102,6 +105,20 @@ export class TourController {
     }
   }
 
+  canGoBack() {
+    return this.history.length > 0 && !this.transitioning;
+  }
+
+  goBack() {
+    if (!this.canGoBack()) return;
+    const targetId = this.history.pop();
+    if (targetId === this.current.id) {
+      this.goBack();
+      return;
+    }
+    this.travel(targetId);
+  }
+
   travel(targetId) {
     if (this.transitioning || targetId === this.current.id) return;
     const from = this.current;
@@ -110,6 +127,7 @@ export class TourController {
 
     this.transitioning = true;
     this.rig.locked = true;
+    this.history.push(from.id);
     this.onTravelStart?.();
     this.hotspotLayer.classList.add('faded');
     this.navLayer.classList.add('faded');
@@ -164,6 +182,7 @@ export class TourController {
     this.hotspotSystem.setForNode(to);
     this._buildMarkers(to);
     this._updateMap();
+    this.onNodeChange?.(to);
     this.audio.setNode(to.id);
     this.transitioning = false;
     this.rig.locked = false;

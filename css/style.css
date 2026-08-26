@@ -184,6 +184,7 @@ html, body {
 .icon-btn svg { width: 20px; height: 20px; }
 .icon-btn:active { transform: scale(.92); }
 .icon-btn:hover { background: rgba(30,38,50,.7); }
+.icon-btn.disabled { opacity: .35; pointer-events: none; }
 
 #bottombar {
   position: fixed;

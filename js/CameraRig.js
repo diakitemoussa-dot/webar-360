@@ -27,6 +27,7 @@ export class CameraRig {
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
     this._zee = new THREE.Vector3(0, 0, 1);
+    this._fwd = new THREE.Vector3();
   }
 
   setFromDeviceOrientation(alphaDeg, betaDeg, gammaDeg, orientRad) {
@@ -79,9 +80,8 @@ export class CameraRig {
   }
 
   currentLon() {
-    const f = new THREE.Vector3();
-    this.camera.getWorldDirection(f);
-    return Math.atan2(-f.x, -f.z);
+    this.camera.getWorldDirection(this._fwd);
+    return Math.atan2(-this._fwd.x, -this._fwd.z);
   }
 
   faceLon(lon) {

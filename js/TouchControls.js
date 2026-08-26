@@ -10,7 +10,44 @@ export class TouchControls {
     element.addEventListener('pointermove', (e) => this._onMove(e));
     element.addEventListener('pointerup', (e) => this._onUp(e));
     element.addEventListener('pointercancel', (e) => this._onUp(e));
+    element.addEventListener('wheel', (e) => this._onWheel(e), { passive: false });
+    window.addEventListener('keydown', (e) => this._onKey(e));
     element.style.touchAction = 'none';
+  }
+
+  _onWheel(event) {
+    event.preventDefault();
+    const zoom = event.deltaY < 0 ? 1.1 : 1 / 1.1;
+    this.rig.pinch(zoom);
+  }
+
+  _onKey(event) {
+    const step = 24;
+    switch (event.key) {
+      case 'ArrowLeft':
+        this.rig.rotate(step, 0);
+        break;
+      case 'ArrowRight':
+        this.rig.rotate(-step, 0);
+        break;
+      case 'ArrowUp':
+        this.rig.rotate(0, step);
+        break;
+      case 'ArrowDown':
+        this.rig.rotate(0, -step);
+        break;
+      case '+':
+      case '=':
+        this.rig.pinch(1.1);
+        break;
+      case '-':
+      case '_':
+        this.rig.pinch(1 / 1.1);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
   }
 
   _onDown(event) {
